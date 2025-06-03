@@ -1,37 +1,32 @@
 const { Brands } = require('../models');
 
 // Lấy danh sách tất cả các thương hiệu
-const danhSachBrands = async (req, res) => {
+
+const danhSachBrands =async(req,res)=>{
   try {
-    const danhsach = await Brands.findAll();
+    const danhsach=await Brands.findAll();
     return res.status(200).json({
-      success: true,
-      message: "Lấy danh sách thương hiệu thành công",
-      data: danhsach
-    });
+      success:true,
+      message:"Lấy danh sách thương hiệu thành công",
+      data:danhsach,
+    })
   } catch (error) {
     res.status(500).json({
-      success: false,
-      message: error.message
-    });
+      success:false,
+      message:error.message
+    })
   }
-};
-
+}
 // Tạo mới thương hiệu
 const createdBrands = async (req, res) => {
   try {
     const { name } = req.body;
     const image = req.file?.path || null;
-
-    if (!name || !image) {
-      return res.status(400).json({
-        success: false,
-        message: "Tên và hình ảnh không được để trống"
-      });
+    const existingBrand = await Brands.findOne({ where: { name } });
+    if (existingBrand) {
+      return res.status(400).json({ message: 'Tên thương hiệu đã tồn tại' });
     }
-
     const newBrand = await Brands.create({ name, image });
-
     return res.status(201).json({
       success: true,
       message: "Tạo thương hiệu thành công",
@@ -130,11 +125,40 @@ const deleteBrands = async (req, res) => {
     });
   }
 };
+const trangThaiBrand = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { is_active } = req.body;
+
+    const [affectedRows] = await Brands.update(
+      { is_active },
+      { where: { id } }
+    );
+
+    if (affectedRows === 0) {
+      return res.status(404).json({
+        status: 'false',
+        message: 'Thương hiệu không tồn tại',
+      });
+    }
+
+    const updatedBrand = await Brands.findByPk(id);
+
+    return res.status(200).json({
+      status: true,
+      message: 'Cập nhật trạng thái thương hiệu thành công',
+      data: updatedBrand,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   danhSachBrands,
   createdBrands,
   getBrandById,
   updatedBrands,
-  deleteBrands
+  deleteBrands,
+  trangThaiBrand
 };

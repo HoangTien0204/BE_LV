@@ -23,13 +23,18 @@ const createdCategories = async (req, res) => {
   try {
     const { name } = req.body; // Lấy dữ liệu từ body
     const image = req.file?.path || null;
-    // Kiểm tra nếu thiếu name hoặc image
-    if (!name || !image) {
-      return res.status(400).json({
-        success: false,
-        message: "Tên và hình ảnh không được để trống"
-      });
-    }
+    //Kiểm tra nếu thiếu name hoặc image
+    // if (!name || !image) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Tên và hình ảnh không được để trống"
+    //   });
+    // }
+// Kiểm tra trùng tên
+const existingCategori = await Categories.findOne({ where: { name } });
+if (existingCategori) {
+  return res.status(400).json({ message: 'Tên danh mục đã tồn tại' });
+}
 
     const newCategory = await Categories.create({ name, image }); // Tạo mới danh mục
 
@@ -126,11 +131,41 @@ const deleteCategories=async(req,res)=>{
         message:"xoa danh muc thanh cong"
     })
 }
+const trangThaiDanhMuc = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { is_active } = req.body;
+
+    const [affectedRows] = await Categories.update(
+      { is_active },
+      { where: { id } }
+    );
+
+    if (affectedRows === 0) {
+      return res.status(404).json({
+        status: 'false',
+        message: 'Danh mục không tồn tại',
+      });
+    }
+
+    const updatedCategory = await Categories.findByPk(id);
+
+    return res.status(200).json({
+      status: true,
+      message: 'Cập nhật thành công',
+      data: updatedCategory,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Export các hàm controller để sử dụng ở nơi khác (router)
 module.exports = {
   danhSachcategories,
   createdCategories,
   getById,
   updatedcategories,
-  deleteCategories
+  deleteCategories,
+  trangThaiDanhMuc
 };

@@ -24,11 +24,16 @@ module.exports = (sequelize, DataTypes) => {
       name: {
         type: DataTypes.STRING,
         allowNull: true,
+        unique:true,
       },
       image: {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      is_active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true 
+    },
       createdAt: {
         type: DataTypes.DATE,
         allowNull: true,
