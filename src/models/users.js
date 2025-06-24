@@ -4,7 +4,10 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Users extends Model {
     static associate(models) {
-      // Định nghĩa các mối quan hệ ở đây nếu cần
+      Users.hasMany(models.Ratings, {
+        foreignKey: 'user_id',
+        as: 'ratings'
+      });
     }
   }
 

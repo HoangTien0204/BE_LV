@@ -2,58 +2,52 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class Orders extends Model {
-    /**
-     * Helper method for defining associations.
-     */
-    
-    
+  class Rating extends Model {
+  
+    static associate(models) {
+      Rating.belongsTo(models.Users, {
+        foreignKey: 'user_id',
+        as: 'user' // đúng: 1 User có nhiều Rating
+      });
+      Rating.belongsTo(models.Orders, {
+        foreignKey: 'order_id',
+        as: 'order' // đúng: 1 Order có nhiều Rating
+      });
+      Rating.belongsTo(models.Products, {
+        foreignKey: 'product_id',
+        as: 'product' // đúng: 1 Product có nhiều Rating
+      });
+    }
   }
 
-  Orders.init(
+  Rating.init(
     {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
       },
-      user_id: {
+      product_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      name: {
+      user_id : {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      order_id: {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      address: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      phone: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      discount_code_id: {
+      star_rating: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      subtotal: {
+      is_approved: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      discount_amount: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-      },
-      total_amount: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-      },
-      status: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      payment_method: {
+      comment: {
         type: DataTypes.STRING,
         allowNull: true,
       },
@@ -68,11 +62,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'Orders', // tên model
-      tableName: 'Orders', // tên bảng trong database
+      modelName: 'Ratings', // tên model
+      tableName: 'ratings', // tên bảng trong database
       timestamps: true,        // tự thêm createdAt, updatedAt nếu true
     }
   );
 
-  return Orders;
+  return Rating;
 };

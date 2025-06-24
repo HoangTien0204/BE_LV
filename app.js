@@ -11,6 +11,7 @@ const loaiColorsRouter = require('./src/routers/colors');
 const loaiOrderRouter = require('./src/routers/orders');
 const loaiDiscount_code=require('./src/routers/discount_codes');
 const authRouter=require('./src/routers/authRouter');
+const loaiRatingRouter=require('./src/routers/rating');
 
 app.use(cors());
 app.use(morgan('dev'));
@@ -24,6 +25,7 @@ app.use('/colors',loaiColorsRouter);
 app.use('/orders',loaiOrderRouter);
 app.use('/discount_codes',loaiDiscount_code);
 app.use('/auth',authRouter)
+app.use('/rating',loaiRatingRouter)
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
