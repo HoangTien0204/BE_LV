@@ -6,7 +6,7 @@ const { omit, pick } = require('lodash')
 const { OAuth2Client } = require('google-auth-library');
 
 // Khởi tạo Google OAuth client
-// const GOOGLE_CLIENT_ID="951997939681-oetg5o8keddr6lfgthaibm11hqo072u3.apps.googleusercontent.com"
+// const GOOGLE_CLIENT_ID="keyne"
 const GOOGLE_CLIENT_ID="164425703475-siefvmnt3n6sn5lk4huvp79k78e5t78a.apps.googleusercontent.com"
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
