@@ -4,7 +4,8 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { omit, pick } = require('lodash')
 const { OAuth2Client } = require('google-auth-library');
-
+const { sendOTP } = require('../utils/mailer');
+const { Op } = require('sequelize');
 // Khởi tạo Google OAuth client
 // const GOOGLE_CLIENT_ID="keyne"
 const GOOGLE_CLIENT_ID="164425703475-siefvmnt3n6sn5lk4huvp79k78e5t78a.apps.googleusercontent.com"
@@ -183,9 +184,83 @@ const adminLoginController = async (req, res, next) => {
         });
     }
 }
+const forgotPasswordController = async (req, res) => {
+    try {
+      const { email } = req.body;
+  
+      const user = await Users.findOne({ where: { email } });
+      if (!user) return res.status(404).json({ message: 'Email không tồn tại' });
+  
+      const otp = String(Math.floor(100000 + Math.random() * 900000));
+      const expiresAt = new Date(Date.now() + 60 * 1000); // 1 phút
+  
+      user.otp = otp;
+      user.otp_expires_at = expiresAt;
+      await user.save();
+  
+      await sendOTP(user.email, otp);
+  
+      res.json({ message: 'Mã OTP đã được gửi đến email của bạn' });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  };
+  const verifyOTP = async (req, res) => {
+    try {
+      const { email, otp } = req.body;
+  
+      const user = await Users.findOne({
+        where: {
+          email,
+          otp,
+          otp_expires_at: { [Op.gt]: new Date() }
+        }
+      });
+  
+      if (!user) {
+        return res.status(400).json({ message: 'OTP không hợp lệ hoặc đã hết hạn' });
+      }
+  
+      res.json({ message: 'OTP hợp lệ' });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  };
+
+
+// Đặt lại mật khẩu
+const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, password } = req.body;
+
+    const user = await Users.findOne({
+      where: {
+        email,
+        otp,
+      
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'OTP không hợp lệ hoặc đã hết hạn' });
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+    user.otp = null;
+    user.otp_expires_at = null;
+    await user.save();
+
+    res.json({ message: 'Đặt lại mật khẩu thành công' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 module.exports = {
     registerController,
     loginController,
     adminLoginController,
-    LoginGoogle
+    LoginGoogle,
+    forgotPasswordController,
+    verifyOTP,
+    resetPassword
 }
